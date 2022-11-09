@@ -1,10 +1,14 @@
 from datetime import datetime
+
+import pyotp
 from flask_login import UserMixin
 from app import db, app
 
 
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
+
+    __table_args__ = {'extend_existing': True}
 
     id = db.Column(db.Integer, primary_key=True)
 
@@ -16,6 +20,7 @@ class User(db.Model, UserMixin):
     firstname = db.Column(db.String(100), nullable=False)
     lastname = db.Column(db.String(100), nullable=False)
     phone = db.Column(db.String(100), nullable=False)
+    pinkey = db.Column(db.String(100), nullable=False)
     role = db.Column(db.String(100), nullable=False, default='user')
 
     # Define the relationship to Draw
@@ -27,12 +32,16 @@ class User(db.Model, UserMixin):
         self.lastname = lastname
         self.phone = phone
         self.password = password
+        self.pinkey = pyotp.random_base32()
         self.role = role
+
 
 
 
 class Draw(db.Model):
     __tablename__ = 'draws'
+
+    __table_args__ = {'extend_existing': True}
 
     id = db.Column(db.Integer, primary_key=True)
 
@@ -67,6 +76,7 @@ def init_db():
     with app.app_context():
         db.drop_all()
         db.create_all()
+        db.extend_existing = True
         admin = User(email='admin@email.com',
                      password='Admin1!',
                      firstname='Alice',

@@ -3,3 +3,5 @@ flask_sqlalchemy
 flask_login
 flask_wtf
 email_validator
+bcrypt
+pyotp

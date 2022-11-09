@@ -1,6 +1,7 @@
 # IMPORTS
 from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
+import os
 
 # CONFIG
 app = Flask(__name__)
@@ -9,8 +10,13 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///lottery.db'
 app.config['SQLALCHEMY_ECHO'] = True
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+app.config['RECAPTCHA_PUBLIC_KEY'] = os.getenv('RECAPTCHA_PUBLIC_KEY')
+app.config['RECAPTCHA_PRIVATE_KEY'] = os.getenv('RECAPTCHA_PRIVATE_KEY')
+
 # initialise database
 db = SQLAlchemy(app)
+
+
 
 
 # HOME PAGE VIEW

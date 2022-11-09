@@ -1,8 +1,8 @@
 import re
 
-from flask_wtf import FlaskForm
+from flask_wtf import FlaskForm, RecaptchaField
 from wtforms import StringField, SubmitField, PasswordField, EmailField, ValidationError
-from wtforms.validators import Email, EqualTo, NoneOf
+from wtforms.validators import Email, EqualTo, NoneOf, DataRequired
 
 
 def check_characters(form, field):
@@ -28,7 +28,14 @@ class RegisterForm(FlaskForm):
     email = EmailField(validators=[Email()])
     firstname = StringField(validators=[check_characters])
     lastname = StringField(validators=[check_characters])
-    phone = StringField()
+    phone = StringField(validators=[])
     password = PasswordField(validators=[])
     confirm_password = PasswordField(validators=[EqualTo('password', message='Both password fields must match')])
+    submit = SubmitField()
+
+class LoginForm(FlaskForm):
+    email = EmailField(validators=[Email()])
+    password = PasswordField(validators=[DataRequired()])
+    pin = StringField(validators=[DataRequired()])
+    recaptcha = RecaptchaField()
     submit = SubmitField()
