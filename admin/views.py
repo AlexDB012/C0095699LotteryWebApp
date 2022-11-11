@@ -2,6 +2,7 @@
 from flask import Blueprint, render_template, request, flash
 from app import db
 from models import User, Draw
+from flask_login import current_user
 
 # CONFIG
 admin_blueprint = Blueprint('admin', __name__, template_folder='templates')
@@ -11,7 +12,10 @@ admin_blueprint = Blueprint('admin', __name__, template_folder='templates')
 # view admin homepage
 @admin_blueprint.route('/admin')
 def admin():
-    return render_template('admin/admin.html', name="PLACEHOLDER FOR FIRSTNAME")
+    if current_user.role == 'admin':
+        return render_template('admin/admin.html', name=current_user.firstname)
+    else:
+        return render_template('403.html')
 
 
 # view all registered users

@@ -1,7 +1,10 @@
 from datetime import datetime
 
+import bcrypt
 import pyotp
 from flask_login import UserMixin
+from sqlalchemy import func
+
 from app import db, app
 
 
@@ -22,6 +25,7 @@ class User(db.Model, UserMixin):
     phone = db.Column(db.String(100), nullable=False)
     pinkey = db.Column(db.String(100), nullable=False)
     role = db.Column(db.String(100), nullable=False, default='user')
+    reg_time_date = db.Column(db.String(100), nullable=False)
 
     # Define the relationship to Draw
     draws = db.relationship('Draw')
@@ -33,6 +37,7 @@ class User(db.Model, UserMixin):
         self.phone = phone
         self.password = password
         self.pinkey = pyotp.random_base32()
+        self.reg_time_date = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
         self.role = role
 
 
@@ -78,12 +83,11 @@ def init_db():
         db.create_all()
         db.extend_existing = True
         admin = User(email='admin@email.com',
-                     password='Admin1!',
+                     password=bcrypt.hashpw('Admin1!'.encode('utf-8'), bcrypt.gensalt()),
                      firstname='Alice',
                      lastname='Jones',
                      phone='0191-123-4567',
                      role='admin')
-
         db.session.add(admin)
         db.session.commit()
 

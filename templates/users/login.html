@@ -5,7 +5,15 @@
     <div class="column is-5 is-offset-4">
         <h3 class="title is-3">Login</h3>
         <div class="box">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="notification is-danger">
+                {{ messages[0] }}
+            </div>
+        {% endif %}
+        {% endwith %}
         {% if form %}
+
             <form method="POST">
                 <div class="field">
                     {{ form.csrf_token() }}
@@ -18,11 +26,11 @@
                         {{ form.password(class="input", placeholder="Password") }}
                     </div>
                 </div>
-                <div class="field">
+                {#<div class="field">
                     <div class="control">
                         {{ form.pin(class="input", placeholder="PIN") }}
                     </div>
-                </div>
+                </div>#}
                 <div>
                     {{ form.recaptcha }}
                     {% for error in form.recaptcha.errors %}

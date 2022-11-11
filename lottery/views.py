@@ -2,6 +2,7 @@
 import logging
 
 from flask import Blueprint, render_template, request, flash
+from flask_login import current_user
 
 from app import db
 from models import Draw
@@ -14,7 +15,11 @@ lottery_blueprint = Blueprint('lottery', __name__, template_folder='templates')
 # view lottery page
 @lottery_blueprint.route('/lottery')
 def lottery():
-    return render_template('lottery/lottery.html')
+    if current_user.role == 'user':
+        return render_template('lottery/lottery.html')
+    else:
+        return render_template('403.html')
+
 
 
 @lottery_blueprint.route('/add_draw', methods=['POST'])

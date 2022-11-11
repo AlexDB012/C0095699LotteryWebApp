@@ -1,6 +1,7 @@
 # IMPORTS
 from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager
 import os
 
 # CONFIG
@@ -15,9 +16,6 @@ app.config['RECAPTCHA_PRIVATE_KEY'] = os.getenv('RECAPTCHA_PRIVATE_KEY')
 
 # initialise database
 db = SQLAlchemy(app)
-
-
-
 
 # HOME PAGE VIEW
 @app.route('/')
@@ -36,6 +34,17 @@ from lottery.views import lottery_blueprint
 app.register_blueprint(users_blueprint)
 app.register_blueprint(admin_blueprint)
 app.register_blueprint(lottery_blueprint)
+
+# LOGIN MANAGER
+login_manager = LoginManager()
+login_manager.login_view = 'users.login'
+login_manager.init_app(app)
+
+from models import User
+
+@login_manager.user_loader
+def load_user(id):
+    return User.query.get(int(id))
 
 
 @app.errorhandler(500)

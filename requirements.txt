@@ -5,3 +5,4 @@ flask_wtf
 email_validator
 bcrypt
 pyotp
+Flask-Login
