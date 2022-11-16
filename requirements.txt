@@ -1,8 +1,11 @@
-Flask
+Flask~=2.2.2
 flask_sqlalchemy
 flask_login
 flask_wtf
 email_validator
-bcrypt
-pyotp
+bcrypt~=4.0.1
+pyotp~=2.7.0
 Flask-Login
+cryptography~=38.0.3
+WTForms~=3.0.1
+MarkupSafe~=2.1.1

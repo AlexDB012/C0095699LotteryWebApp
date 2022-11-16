@@ -1,12 +1,13 @@
 # IMPORTS
+from cryptography.fernet import Fernet
 from flask import Blueprint, render_template, request, flash
 from app import db
 from models import User, Draw
 from flask_login import current_user
+from static.encryption import encrypt, decrypt
 
 # CONFIG
 admin_blueprint = Blueprint('admin', __name__, template_folder='templates')
-
 
 # VIEWS
 # view admin homepage
@@ -23,7 +24,7 @@ def admin():
 def view_all_users():
     current_users = User.query.filter_by(role='user').all()
 
-    return render_template('admin/admin.html', name="PLACEHOLDER FOR FIRSTNAME", current_users=current_users)
+    return render_template('admin/admin.html', name=current_user.firstname, current_users=current_users)
 
 
 # create a new winning draw
@@ -51,7 +52,7 @@ def create_winning_draw():
     submitted_draw.strip()
 
     # create a new draw object with the form data.
-    new_winning_draw = Draw(user_id=0, numbers=submitted_draw, master_draw=True, lottery_round=lottery_round)
+    new_winning_draw = Draw(user_id=0, numbers=encrypt(submitted_draw, current_user.encryptkey), master_draw=True, lottery_round=lottery_round)
 
     # add the new winning draw to the database
     db.session.add(new_winning_draw)
@@ -71,8 +72,9 @@ def view_winning_draw():
 
     # if a winning draw exists
     if current_winning_draw:
+        current_winning_draw.numbers = decrypt(current_winning_draw.numbers, current_user.encryptkey)
         # re-render admin page with current winning draw and lottery round
-        return render_template('admin/admin.html', winning_draw=current_winning_draw, name="PLACEHOLDER FOR FIRSTNAME")
+        return render_template('admin/admin.html', winning_draw=current_winning_draw, name=current_user.firstname)
 
     # if no winning draw exists, rerender admin page
     flash("No valid winning draw exists. Please add new winning draw.")
@@ -82,6 +84,7 @@ def view_winning_draw():
 # view lottery results and winners
 @admin_blueprint.route('/run_lottery', methods=['POST'])
 def run_lottery():
+
 
     # get current unplayed winning draw
     current_winning_draw = Draw.query.filter_by(master_draw=True, been_played=False).first()
@@ -101,11 +104,17 @@ def run_lottery():
             db.session.add(current_winning_draw)
             db.session.commit()
 
+            # Decrypt the current winning draw before comparing it to user draws
+            current_winning_draw.numbers = decrypt(current_winning_draw.numbers, current_user.encryptkey)
+
             # for each unplayed user draw
             for draw in user_draws:
 
                 # get the owning user (instance/object)
                 user = User.query.filter_by(id=draw.user_id).first()
+
+                # decrypt the draw numbers with the user who submitted them encryption key
+                draw.numbers = decrypt(draw.numbers, user.encryptkey)
 
                 # if user draw matches current unplayed winning draw
                 if draw.numbers == current_winning_draw.numbers:
@@ -131,7 +140,7 @@ def run_lottery():
             if len(results) == 0:
                 flash("No winners.")
 
-            return render_template('admin/admin.html', results=results, name="PLACEHOLDER FOR FIRSTNAME")
+            return render_template('admin/admin.html', results=results, name=current_user.firstname)
 
         flash("No user draws entered.")
         return admin()
@@ -148,4 +157,4 @@ def logs():
         content = f.read().splitlines()[-10:]
         content.reverse()
 
-    return render_template('admin/admin.html', logs=content, name="PLACEHOLDER FOR FIRSTNAME")
+    return render_template('admin/admin.html', logs=content, name=current_user.firstname)

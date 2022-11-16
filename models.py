@@ -3,7 +3,7 @@ from datetime import datetime
 import bcrypt
 import pyotp
 from flask_login import UserMixin
-from sqlalchemy import func
+from cryptography.fernet import Fernet
 
 from app import db, app
 
@@ -24,6 +24,7 @@ class User(db.Model, UserMixin):
     lastname = db.Column(db.String(100), nullable=False)
     phone = db.Column(db.String(100), nullable=False)
     pinkey = db.Column(db.String(100), nullable=False)
+    encryptkey = db.Column(db.String(100), nullable=False)
     role = db.Column(db.String(100), nullable=False, default='user')
     reg_time_date = db.Column(db.String(100), nullable=False)
 
@@ -37,6 +38,7 @@ class User(db.Model, UserMixin):
         self.phone = phone
         self.password = password
         self.pinkey = pyotp.random_base32()
+        self.encryptkey = Fernet.generate_key()
         self.reg_time_date = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
         self.role = role
 
