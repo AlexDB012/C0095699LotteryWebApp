@@ -27,6 +27,9 @@ class User(db.Model, UserMixin):
     encryptkey = db.Column(db.String(100), nullable=False)
     role = db.Column(db.String(100), nullable=False, default='user')
     reg_time_date = db.Column(db.String(100), nullable=False)
+    cur_login_time_date = db.Column(db.String(100), nullable=True)
+    last_login_time_date = db.Column(db.String(100), nullable=True)
+
 
     # Define the relationship to Draw
     draws = db.relationship('Draw')

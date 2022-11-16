@@ -1,8 +1,10 @@
 # IMPORTS
 import pyotp
-from flask import Blueprint, render_template, flash, redirect, url_for, session, request, jsonify
+from flask import Blueprint, render_template, flash, redirect, url_for, session, request
 from flask_login import login_user, current_user, logout_user
 from markupsafe import Markup
+from datetime import datetime
+from static.helpers import log_invalid_access_attempt
 
 from app import db
 from models import User
@@ -13,12 +15,15 @@ import bcrypt
 users_blueprint = Blueprint('users', __name__, template_folder='templates')
 admin_blueprint = Blueprint('admin', __name__, template_folder='templates')
 
+# Function for writing to log file when an invalid access attempt is made to a page
+
 
 # VIEWS
 # view registration
 @users_blueprint.route('/register', methods=['GET', 'POST'])
 def register():
     if not current_user.is_anonymous:
+        log_invalid_access_attempt()
         return render_template('403.html')
 
     # create signup form object
@@ -48,7 +53,7 @@ def register():
 
         # Opens and writes the current registration to the log
         f = open("lottery.log", "a")
-        f.write("\nEmail: {email} RequestIP: {requestIP}".format(email=form.email.data, requestIP=request.remote_addr))
+        f.write("\nREGISTRATION Email: {email} RequestIP: {requestIP}".format(email=form.email.data, requestIP=request.remote_addr))
         f.close()
 
         # sends user to login page
@@ -61,6 +66,7 @@ def register():
 @users_blueprint.route('/login', methods=['GET', 'POST'])
 def login():
     if not current_user.is_anonymous:
+        log_invalid_access_attempt()
         return render_template('403.html')
 
     if not session.get('authentication_attempts'):
@@ -80,10 +86,28 @@ def login():
                 return render_template('users/login.html')
             flash('Either your email, password or pin is incorrect, {} login attempts remaining'.format(
                 3 - session.get('authentication_attempts')))
+
+            # Writes invalid login attempt to log
+            f = open("lottery.log", "a")
+            f.write("\nINVALID LOGIN Email: {email} RequestIP: {requestIP}".format(email=form.email.data, requestIP=request.remote_addr))
+            f.close()
+
             return render_template('users/login.html', form=form)
         else:
+            # Logs in user with entered details
             login_user(user)
-            if (current_user.role == 'admin'):
+
+            # Sets the current login time in the database
+            user.cur_login_time_date = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+            db.session.commit()
+
+            # Writes the current login to the log file
+            f = open("lottery.log", "a")
+            f.write("\nLOGIN UserID: {userID} Email: {email} RequestIP: {requestIP}".format(userID=user.id, email=user.email, requestIP=request.remote_addr))
+            f.close()
+
+            # Sends the user to the admin page if they are an admin or to their profile page if not
+            if current_user.role == 'admin':
                 return redirect(url_for('admin.admin', name=current_user.firstname))
             else:
                 return redirect(url_for('users.profile'))
@@ -97,6 +121,7 @@ def profile():
     if not current_user.is_anonymous and current_user.role == 'user':
         return render_template('users/profile.html', name=current_user.firstname + ' ' + current_user.lastname)
     else:
+        log_invalid_access_attempt()
         return render_template('403.html')
 
 
@@ -111,6 +136,7 @@ def account():
                                lastname=current_user.lastname,
                                phone=current_user.phone)
     else:
+        log_invalid_access_attempt()
         return render_template('403.html')
 
 
@@ -122,5 +148,22 @@ def reset():
 
 @users_blueprint.route('/logout')
 def logout():
+    if not current_user.is_authenticated:
+        log_invalid_access_attempt()
+        return redirect(url_for('index'))
+
+    # In the database sets the last login time and date for the current user
+    current_user.last_login_time_date = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+    db.session.commit()
+
+    # Writes to the log file the logout information of user
+    f = open("lottery.log", "a")
+    f.write("\nLOGOUT UserID: {userID} Email: {email} RequestIP: {requestIP}".format(userID=current_user.id, email=current_user.email,
+                                                                                      requestIP=request.remote_addr))
+    f.close()
+
+    # Logouts user
     logout_user()
+
+    # Redirects user to index page
     return redirect(url_for('index'))

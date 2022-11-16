@@ -2,7 +2,7 @@
 import logging
 
 from cryptography.fernet import Fernet
-from static.encryption import encrypt, decrypt
+from static.helpers import encrypt, decrypt, log_invalid_access_attempt
 from flask import Blueprint, render_template, request, flash
 from flask_login import current_user
 
@@ -16,9 +16,10 @@ lottery_blueprint = Blueprint('lottery', __name__, template_folder='templates')
 # view lottery page
 @lottery_blueprint.route('/lottery')
 def lottery():
-    if current_user.role == 'user':
+    if current_user.is_authenticated and current_user.role == 'user':
         return render_template('lottery/lottery.html')
     else:
+        log_invalid_access_attempt()
         return render_template('403.html')
 
 

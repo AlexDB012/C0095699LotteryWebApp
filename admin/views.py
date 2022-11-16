@@ -4,7 +4,7 @@ from flask import Blueprint, render_template, request, flash
 from app import db
 from models import User, Draw
 from flask_login import current_user
-from static.encryption import encrypt, decrypt
+from static.helpers import encrypt, decrypt, log_invalid_access_attempt
 
 # CONFIG
 admin_blueprint = Blueprint('admin', __name__, template_folder='templates')
@@ -13,9 +13,10 @@ admin_blueprint = Blueprint('admin', __name__, template_folder='templates')
 # view admin homepage
 @admin_blueprint.route('/admin')
 def admin():
-    if current_user.role == 'admin':
+    if current_user.is_authenticated and current_user.role == 'admin':
         return render_template('admin/admin.html', name=current_user.firstname)
     else:
+        log_invalid_access_attempt()
         return render_template('403.html')
 
 

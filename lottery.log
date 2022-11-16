@@ -1,2 +1,10 @@
 
-Email: wadawd@gmail.com RequestIP: 127.0.0.1
+REGISTRATION Email: james.brown@gmail.com RequestIP: 127.0.0.1
+LOGIN UserID: 3 Email: james.brown@gmail.com RequestIP: 127.0.0.1
+LOGOUT UserID: 3 Email: james.brown@gmail.com RequestIP: 127.0.0.1
+INVALID ACCESS ATTEMPT UserID: INVALID Email: INVALID UserRole: ANONYMOUS requestIP: 127.0.0.1
+LOGIN UserID: 2 Email: alex.bove.123@hotmail.com RequestIP: 127.0.0.1
+INVALID ACCESS ATTEMPT UserID: 2 Email: alex.bove.123@hotmail.com UserRole: user requestIP: 127.0.0.1
+LOGOUT UserID: 2 Email: alex.bove.123@hotmail.com RequestIP: 127.0.0.1
+INVALID ACCESS ATTEMPT UserID: INVALID Email: INVALID UserRole: ANONYMOUS requestIP: 127.0.0.1
+INVALID ACCESS ATTEMPT UserID: INVALID Email: INVALID UserRole: ANONYMOUS requestIP: 127.0.0.1
