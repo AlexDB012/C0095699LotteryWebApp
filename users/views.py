@@ -15,14 +15,11 @@ import bcrypt
 users_blueprint = Blueprint('users', __name__, template_folder='templates')
 admin_blueprint = Blueprint('admin', __name__, template_folder='templates')
 
+
 # VIEWS
 # view registration
 @users_blueprint.route('/register', methods=['GET', 'POST'])
 def register():
-    if not current_user.is_anonymous:
-        log_invalid_access_attempt()
-        return render_template('errors/403.html')
-
     # create signup form object
     form = RegisterForm()
 
@@ -63,25 +60,22 @@ def register():
 # view user login
 @users_blueprint.route('/login', methods=['GET', 'POST'])
 def login():
-    if not current_user.is_anonymous:
-        log_invalid_access_attempt()
-        return render_template('errors/403.html')
-
     if not session.get('authentication_attempts'):
         session['authentication_attempts'] = 0
 
+    # Gets the login form defined in users/forms.py
     form = LoginForm()
 
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
 
+        # Checks to see if the entered information is valid and is an actual account. The user has 3 attempts before they must reset their attempts and try again.
         if not user or not bcrypt.checkpw(form.password.data.encode('utf-8'),
                                           user.password):  # or not pyotp.TOTP(user.pinkey).verify(form.pin.data):
             session['authentication_attempts'] += 1
             if session.get('authentication_attempts') >= 3:
                 flash(Markup(
                     'Number of incorrect login attempts exceeded. Please click <a href="/reset">here</a> to reset'))
-                return render_template('users/login.html')
             flash('Either your email, password or pin is incorrect, {} login attempts remaining'.format(
                 3 - session.get('authentication_attempts')))
 
@@ -122,6 +116,7 @@ def login():
 @login_required
 @required_roles('user')
 def profile():
+    # Renders the users profile
     return render_template('users/profile.html', name=current_user.firstname + ' ' + current_user.lastname)
 
 
@@ -129,6 +124,7 @@ def profile():
 @users_blueprint.route('/account')
 @login_required
 def account():
+    # Renders the users account with their information
     return render_template('users/account.html',
                            acc_no=current_user.id,
                            email=current_user.email,
@@ -137,13 +133,16 @@ def account():
                            phone=current_user.phone)
 
 
+# view reset login attempts
 @users_blueprint.route('/reset')
 @login_required
 def reset():
+    # Sets the current sessions authentication attempts back to 0 and redirects to the login page
     session['authentication_attempts'] = 0
     return redirect(url_for('users.login'))
 
 
+# view logout user
 @users_blueprint.route('/logout')
 @login_required
 def logout():

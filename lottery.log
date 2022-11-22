@@ -9,3 +9,8 @@
 11/22/2022 04:13:54 PM : SECURITY - Log in [2, alex.bove.123@hotmail.com, 127.0.0.1]
 11/22/2022 04:18:02 PM : SECURITY - Log out [2, alex.bove.123@hotmail.com, 127.0.0.1]
 11/22/2022 04:18:11 PM : SECURITY - Log in [1, admin@email.com, 127.0.0.1]
+11/22/2022 04:41:14 PM : SECURITY - Invalid access attempt [1, admin@email.com, admin, 127.0.0.1]
+11/22/2022 04:41:20 PM : SECURITY - Invalid access attempt [1, admin@email.com, admin, 127.0.0.1]
+11/22/2022 04:50:20 PM : SECURITY - Invalid access attempt [1, admin@email.com, admin, 127.0.0.1]
+11/22/2022 04:51:55 PM : SECURITY - Invalid access attempt [1, admin@email.com, admin, 127.0.0.1]
+11/22/2022 04:52:08 PM : SECURITY - Log out [1, admin@email.com, 127.0.0.1]

@@ -16,15 +16,15 @@ def decrypt(data, key):
     return Fernet(key).decrypt(data).decode('utf-8')
 
 
+# Function that logs an invalid access attempt
 def log_invalid_access_attempt():
-
     if current_user.is_authenticated:
         logging.warning('SECURITY - Invalid access attempt [%s, %s, %s, %s]',
                         current_user.id,
                         current_user.email,
                         current_user.role,
                         request.remote_addr
-                    )
+                        )
 
     else:
         logging.warning('SECURITY - Invalid access attempt [%s, %s, %s, %s]',
@@ -32,9 +32,10 @@ def log_invalid_access_attempt():
                         'Anonymous',
                         'Anonymous',
                         request.remote_addr
-                    )
+                        )
 
 
+# Wrapper for adding the roles required by the user to access a page or function
 def required_roles(*roles):
     def wrapper(f):
         @wraps(f)
@@ -43,5 +44,7 @@ def required_roles(*roles):
                 log_invalid_access_attempt()
                 return render_template('errors/403.html')
             return f(*args, **kwargs)
+
         return wrapped
+
     return wrapper

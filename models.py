@@ -1,13 +1,13 @@
+# IMPORTS
 from datetime import datetime
-
 import bcrypt
 import pyotp
 from flask_login import UserMixin
 from cryptography.fernet import Fernet
-
 from app import db, app
 
 
+# User Model
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
 
@@ -47,6 +47,7 @@ class User(db.Model, UserMixin):
         self.role = role
 
 
+# Draw model
 class Draw(db.Model):
     __tablename__ = 'draws'
 
@@ -81,6 +82,7 @@ class Draw(db.Model):
         self.lottery_round = lottery_round
 
 
+# Initialise database
 def init_db():
     with app.app_context():
         db.drop_all()

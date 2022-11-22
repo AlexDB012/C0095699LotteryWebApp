@@ -22,20 +22,27 @@ def lottery():
     return render_template('lottery/lottery.html')
 
 
+# adding a draw
 @lottery_blueprint.route('/add_draw', methods=['POST'])
 @login_required
 @required_roles('user')
 def add_draw():
-    submitted_draw = ''
+    # variable used to determine if draw is valid or not
     draw_missing_numbers = False
 
+    # get new winning draw entered in form
+    submitted_draw = ''
     for i in range(6):
+        # checks if any values being submitted are missing and if so breaks and doesn't let it be submitted
         if request.form.get('no' + str(i + 1)) == '':
             draw_missing_numbers = True
             break
+        # if no issue the current number is added to the submitted draw
         submitted_draw += request.form.get('no' + str(i + 1)) + ' '
+    # remove any surrounding whitespace
     submitted_draw.strip()
 
+    # if the winning draw attempting to be submitted is missing numbers doesn't let it submit it
     if not draw_missing_numbers:
         # create a new draw with the form data.
         new_draw = Draw(user_id=current_user.id,

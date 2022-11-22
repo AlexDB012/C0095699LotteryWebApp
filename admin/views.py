@@ -34,21 +34,24 @@ def view_all_users():
 @login_required
 @required_roles('admin')
 def create_winning_draw():
-    # get current winning draw
-
-    # get new winning draw entered in form
+    # variable used to determine if draw is valid or not
     draw_missing_numbers = False
 
+    # get new winning draw entered in form
     submitted_draw = ''
     for i in range(6):
+        # checks if any values being submitted are missing and if so breaks and doesn't let it be submitted
         if request.form.get('no' + str(i + 1)) == '':
             draw_missing_numbers = True
             break
+        # if no issue the current number is added to the submitted draw
         submitted_draw += request.form.get('no' + str(i + 1)) + ' '
     # remove any surrounding whitespace
     submitted_draw.strip()
 
+    # if the winning draw attempting to be submitted is missing numbers doesn't let it submit it
     if not draw_missing_numbers:
+        # get current winning draw
         current_winning_draw = Draw.query.filter_by(master_draw=True).first()
         lottery_round = 1
 
@@ -88,6 +91,7 @@ def view_winning_draw():
 
     # if a winning draw exists
     if current_winning_draw:
+        # gets the current winning draw
         current_winning_draw.numbers = decrypt(current_winning_draw.numbers, current_user.encryptkey)
         # re-render admin page with current winning draw and lottery round
         return render_template('admin/admin.html', winning_draw=current_winning_draw, name=current_user.firstname)
@@ -157,6 +161,7 @@ def run_lottery():
 
             return render_template('admin/admin.html', results=results, name=current_user.firstname)
 
+        # if no user draws
         flash("No user draws entered.")
         return admin()
 
