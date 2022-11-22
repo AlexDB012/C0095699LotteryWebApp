@@ -41,7 +41,7 @@ def required_roles(*roles):
         def wrapped(*args, **kwargs):
             if current_user.role not in roles:
                 log_invalid_access_attempt()
-                return render_template('403.html')
+                return render_template('errors/403.html')
             return f(*args, **kwargs)
         return wrapped
     return wrapper

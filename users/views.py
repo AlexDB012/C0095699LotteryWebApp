@@ -21,7 +21,7 @@ admin_blueprint = Blueprint('admin', __name__, template_folder='templates')
 def register():
     if not current_user.is_anonymous:
         log_invalid_access_attempt()
-        return render_template('403.html')
+        return render_template('errors/403.html')
 
     # create signup form object
     form = RegisterForm()
@@ -65,7 +65,7 @@ def register():
 def login():
     if not current_user.is_anonymous:
         log_invalid_access_attempt()
-        return render_template('403.html')
+        return render_template('errors/403.html')
 
     if not session.get('authentication_attempts'):
         session['authentication_attempts'] = 0
