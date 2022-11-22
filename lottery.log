@@ -1,10 +1,11 @@
 
-REGISTRATION Email: james.brown@gmail.com RequestIP: 127.0.0.1
-LOGIN UserID: 3 Email: james.brown@gmail.com RequestIP: 127.0.0.1
-LOGOUT UserID: 3 Email: james.brown@gmail.com RequestIP: 127.0.0.1
-INVALID ACCESS ATTEMPT UserID: INVALID Email: INVALID UserRole: ANONYMOUS requestIP: 127.0.0.1
-LOGIN UserID: 2 Email: alex.bove.123@hotmail.com RequestIP: 127.0.0.1
-INVALID ACCESS ATTEMPT UserID: 2 Email: alex.bove.123@hotmail.com UserRole: user requestIP: 127.0.0.1
-LOGOUT UserID: 2 Email: alex.bove.123@hotmail.com RequestIP: 127.0.0.1
-INVALID ACCESS ATTEMPT UserID: INVALID Email: INVALID UserRole: ANONYMOUS requestIP: 127.0.0.1
-INVALID ACCESS ATTEMPT UserID: INVALID Email: INVALID UserRole: ANONYMOUS requestIP: 127.0.0.1
+11/21/2022 04:42:15 PM : SECURITY - Log out [1, admin@email.com, 127.0.0.1]
+11/21/2022 04:42:19 PM : SECURITY - Log in [2, alex.bove.123@hotmail.com, 127.0.0.1]
+11/21/2022 04:57:03 PM : SECURITY - Log out [2, alex.bove.123@hotmail.com, 127.0.0.1]
+11/21/2022 04:57:14 PM : SECURITY - Log in [1, admin@email.com, 127.0.0.1]
+11/22/2022 04:09:20 PM : SECURITY - Log in [1, admin@email.com, 127.0.0.1]
+11/22/2022 04:11:09 PM : SECURITY - Invalid access attempt [1, admin@email.com, admin, 127.0.0.1]
+11/22/2022 04:13:52 PM : SECURITY - Log out [1, admin@email.com, 127.0.0.1]
+11/22/2022 04:13:54 PM : SECURITY - Log in [2, alex.bove.123@hotmail.com, 127.0.0.1]
+11/22/2022 04:18:02 PM : SECURITY - Log out [2, alex.bove.123@hotmail.com, 127.0.0.1]
+11/22/2022 04:18:11 PM : SECURITY - Log in [1, admin@email.com, 127.0.0.1]

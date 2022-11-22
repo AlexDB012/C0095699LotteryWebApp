@@ -1,6 +1,9 @@
+import logging
+
 from cryptography.fernet import Fernet
 from flask_login import current_user
-from flask import request
+from flask import request, render_template
+from functools import wraps
 
 
 # Function for encrypting data
@@ -14,17 +17,31 @@ def decrypt(data, key):
 
 
 def log_invalid_access_attempt():
-    f = open("lottery.log", "a")
 
     if current_user.is_authenticated:
-        f.write(
-            "\nINVALID ACCESS ATTEMPT UserID: {userID} Email: {email} UserRole: {userRole} requestIP: {requestIP}".format(
-                userID=current_user.id, email=current_user.email, userRole=current_user.role,
-                requestIP=request.remote_addr))
+        logging.warning('SECURITY - Invalid access attempt [%s, %s, %s, %s]',
+                        current_user.id,
+                        current_user.email,
+                        current_user.role,
+                        request.remote_addr
+                    )
 
     else:
-        f.write(
-            "\nINVALID ACCESS ATTEMPT UserID: INVALID Email: INVALID UserRole: ANONYMOUS requestIP: {requestIP}".format(
-                requestIP=request.remote_addr))
+        logging.warning('SECURITY - Invalid access attempt [%s, %s, %s, %s]',
+                        'Anonymous',
+                        'Anonymous',
+                        'Anonymous',
+                        request.remote_addr
+                    )
 
-    f.close()
+
+def required_roles(*roles):
+    def wrapper(f):
+        @wraps(f)
+        def wrapped(*args, **kwargs):
+            if current_user.role not in roles:
+                log_invalid_access_attempt()
+                return render_template('403.html')
+            return f(*args, **kwargs)
+        return wrapped
+    return wrapper

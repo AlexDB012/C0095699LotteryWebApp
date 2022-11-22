@@ -2,9 +2,9 @@
 import logging
 
 from cryptography.fernet import Fernet
-from static.helpers import encrypt, decrypt, log_invalid_access_attempt
+from static.helpers import encrypt, decrypt, log_invalid_access_attempt, required_roles
 from flask import Blueprint, render_template, request, flash
-from flask_login import current_user
+from flask_login import current_user, login_required
 
 from app import db
 from models import Draw
@@ -12,45 +12,56 @@ from models import Draw
 # CONFIG
 lottery_blueprint = Blueprint('lottery', __name__, template_folder='templates')
 
+
 # VIEWS
 # view lottery page
 @lottery_blueprint.route('/lottery')
+@login_required
+@required_roles('user')
 def lottery():
-    if current_user.is_authenticated and current_user.role == 'user':
-        return render_template('lottery/lottery.html')
-    else:
-        log_invalid_access_attempt()
-        return render_template('403.html')
+    return render_template('lottery/lottery.html')
 
 
 @lottery_blueprint.route('/add_draw', methods=['POST'])
+@login_required
+@required_roles('user')
 def add_draw():
     submitted_draw = ''
+    draw_missing_numbers = False
+
     for i in range(6):
+        if request.form.get('no' + str(i + 1)) == '':
+            draw_missing_numbers = True
+            break
         submitted_draw += request.form.get('no' + str(i + 1)) + ' '
     submitted_draw.strip()
 
-    # create a new draw with the form data.
-    new_draw = Draw(user_id=current_user.id,
-                    numbers=encrypt(submitted_draw, current_user.encryptkey), master_draw=False,
-                    lottery_round=0)
+    if not draw_missing_numbers:
+        # create a new draw with the form data.
+        new_draw = Draw(user_id=current_user.id,
+                        numbers=encrypt(submitted_draw, current_user.encryptkey), master_draw=False,
+                        lottery_round=0)
 
-    # add the new draw to the database
-    db.session.add(new_draw)
-    db.session.commit()
+        # add the new draw to the database
+        db.session.add(new_draw)
+        db.session.commit()
 
-    # re-render lottery.page
-    flash('Draw %s submitted.' % submitted_draw)
-    return lottery()
+        # re-render lottery.page
+        flash('Draw %s submitted.' % submitted_draw)
+        return lottery()
+    else:
+        flash('Draw must contain 6 numbers')
+        return lottery()
 
 
 # view all draws that have not been played
 @lottery_blueprint.route('/view_draws', methods=['POST'])
+@login_required
+@required_roles('user')
 def view_draws():
     # get all draws that have not been played [played=0]
     playable_draws = Draw.query.filter_by(been_played=False,
-                                          user_id=current_user.id).all()  # TODO: filter playable draws for current user
-
+                                          user_id=current_user.id).all()
 
     # if playable draws exist
     if len(playable_draws) != 0:
@@ -68,6 +79,8 @@ def view_draws():
 
 # view lottery results
 @lottery_blueprint.route('/check_draws', methods=['POST'])
+@login_required
+@required_roles('user')
 def check_draws():
     # get played draws
     played_draws = Draw.query.filter_by(been_played=True, user_id=current_user.id).all()
@@ -84,6 +97,8 @@ def check_draws():
 
 # delete all played draws
 @lottery_blueprint.route('/play_again', methods=['POST'])
+@login_required
+@required_roles('user')
 def play_again():
     Draw.query.filter_by(been_played=True, master_draw=False).delete(synchronize_session=False)
     db.session.commit()

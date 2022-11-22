@@ -3,6 +3,28 @@ from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 import os
+import logging
+
+
+# Logging Set Up
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+
+file_handler = logging.FileHandler('lottery.log', 'a')
+file_handler.setLevel(logging.WARNING)
+
+
+class SecurityFilter(logging.Filter):
+    def filter(self, record):
+        return 'SECURITY' in record.getMessage()
+
+
+file_handler.addFilter(SecurityFilter())
+
+formatter = logging.Formatter('%(asctime)s : %(message)s', '%m/%d/%Y %I:%M:%S %p')
+file_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
 
 # CONFIG
 app = Flask(__name__)
@@ -17,6 +39,7 @@ app.config['RECAPTCHA_PRIVATE_KEY'] = os.getenv('RECAPTCHA_PRIVATE_KEY')
 # initialise database
 db = SQLAlchemy(app)
 
+
 # HOME PAGE VIEW
 @app.route('/')
 def index():
@@ -29,7 +52,6 @@ from users.views import users_blueprint
 from admin.views import admin_blueprint
 from lottery.views import lottery_blueprint
 
-#
 # # register blueprints with app
 app.register_blueprint(users_blueprint)
 app.register_blueprint(admin_blueprint)
@@ -40,7 +62,11 @@ login_manager = LoginManager()
 login_manager.login_view = 'users.login'
 login_manager.init_app(app)
 
+
+
+
 from models import User
+
 
 @login_manager.user_loader
 def load_user(id):

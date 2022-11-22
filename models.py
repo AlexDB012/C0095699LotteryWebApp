@@ -26,10 +26,9 @@ class User(db.Model, UserMixin):
     pinkey = db.Column(db.String(100), nullable=False)
     encryptkey = db.Column(db.String(100), nullable=False)
     role = db.Column(db.String(100), nullable=False, default='user')
-    reg_time_date = db.Column(db.String(100), nullable=False)
-    cur_login_time_date = db.Column(db.String(100), nullable=True)
-    last_login_time_date = db.Column(db.String(100), nullable=True)
-
+    reg_time_date = db.Column(db.DateTime, nullable=False)
+    cur_login_time_date = db.Column(db.DateTime, nullable=True)
+    last_login_time_date = db.Column(db.DateTime, nullable=True)
 
     # Define the relationship to Draw
     draws = db.relationship('Draw')
@@ -42,10 +41,10 @@ class User(db.Model, UserMixin):
         self.password = password
         self.pinkey = pyotp.random_base32()
         self.encryptkey = Fernet.generate_key()
-        self.reg_time_date = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+        self.reg_time_date = datetime.now()
+        self.cur_login_time_date = None
+        self.last_login_time_date = None
         self.role = role
-
-
 
 
 class Draw(db.Model):
@@ -95,5 +94,3 @@ def init_db():
                      role='admin')
         db.session.add(admin)
         db.session.commit()
-
-

@@ -3,25 +3,26 @@ from cryptography.fernet import Fernet
 from flask import Blueprint, render_template, request, flash
 from app import db
 from models import User, Draw
-from flask_login import current_user
-from static.helpers import encrypt, decrypt, log_invalid_access_attempt
+from flask_login import current_user, login_required
+from static.helpers import encrypt, decrypt, log_invalid_access_attempt, required_roles
 
 # CONFIG
 admin_blueprint = Blueprint('admin', __name__, template_folder='templates')
 
+
 # VIEWS
 # view admin homepage
 @admin_blueprint.route('/admin')
+@login_required
+@required_roles('admin')
 def admin():
-    if current_user.is_authenticated and current_user.role == 'admin':
-        return render_template('admin/admin.html', name=current_user.firstname)
-    else:
-        log_invalid_access_attempt()
-        return render_template('403.html')
+    return render_template('admin/admin.html', name=current_user.firstname)
 
 
 # view all registered users
 @admin_blueprint.route('/view_all_users', methods=['POST'])
+@login_required
+@required_roles('admin')
 def view_all_users():
     current_users = User.query.filter_by(role='user').all()
 
@@ -30,46 +31,60 @@ def view_all_users():
 
 # create a new winning draw
 @admin_blueprint.route('/create_winning_draw', methods=['POST'])
+@login_required
+@required_roles('admin')
 def create_winning_draw():
-
     # get current winning draw
-    current_winning_draw = Draw.query.filter_by(master_draw=True).first()
-    lottery_round = 1
-
-    # if a current winning draw exists
-    if current_winning_draw:
-        # update lottery round by 1
-        lottery_round = current_winning_draw.lottery_round + 1
-
-        # delete current winning draw
-        db.session.delete(current_winning_draw)
-        db.session.commit()
 
     # get new winning draw entered in form
+    draw_missing_numbers = False
+
     submitted_draw = ''
     for i in range(6):
+        if request.form.get('no' + str(i + 1)) == '':
+            draw_missing_numbers = True
+            break
         submitted_draw += request.form.get('no' + str(i + 1)) + ' '
     # remove any surrounding whitespace
     submitted_draw.strip()
 
-    # create a new draw object with the form data.
-    new_winning_draw = Draw(user_id=0, numbers=encrypt(submitted_draw, current_user.encryptkey), master_draw=True, lottery_round=lottery_round)
+    if not draw_missing_numbers:
+        current_winning_draw = Draw.query.filter_by(master_draw=True).first()
+        lottery_round = 1
 
-    # add the new winning draw to the database
-    db.session.add(new_winning_draw)
-    db.session.commit()
+        # if a current winning draw exists
+        if current_winning_draw:
+            # update lottery round by 1
+            lottery_round = current_winning_draw.lottery_round + 1
 
-    # re-render admin page
-    flash("New winning draw added.")
-    return admin()
+            # delete current winning draw
+            db.session.delete(current_winning_draw)
+            db.session.commit()
+
+        # create a new draw object with the form data.
+        new_winning_draw = Draw(user_id=0, numbers=encrypt(submitted_draw, current_user.encryptkey), master_draw=True,
+                                lottery_round=lottery_round)
+
+        # add the new winning draw to the database
+        db.session.add(new_winning_draw)
+        db.session.commit()
+
+        # re-render admin page
+        flash("New winning draw added.")
+        return admin()
+
+    else:
+        flash('Draw must contain 6 numbers')
+        return admin()
 
 
 # view current winning draw
 @admin_blueprint.route('/view_winning_draw', methods=['POST'])
+@login_required
+@required_roles('admin')
 def view_winning_draw():
-
     # get winning draw from DB
-    current_winning_draw = Draw.query.filter_by(master_draw=True,been_played=False).first()
+    current_winning_draw = Draw.query.filter_by(master_draw=True, been_played=False).first()
 
     # if a winning draw exists
     if current_winning_draw:
@@ -84,9 +99,9 @@ def view_winning_draw():
 
 # view lottery results and winners
 @admin_blueprint.route('/run_lottery', methods=['POST'])
+@login_required
+@required_roles('admin')
 def run_lottery():
-
-
     # get current unplayed winning draw
     current_winning_draw = Draw.query.filter_by(master_draw=True, been_played=False).first()
 
@@ -119,7 +134,6 @@ def run_lottery():
 
                 # if user draw matches current unplayed winning draw
                 if draw.numbers == current_winning_draw.numbers:
-
                     # add details of winner to list of results
                     results.append((current_winning_draw.lottery_round, draw.numbers, draw.user_id, user.email))
 
@@ -153,6 +167,8 @@ def run_lottery():
 
 # view last 10 log entries
 @admin_blueprint.route('/logs', methods=['POST'])
+@login_required
+@required_roles('admin')
 def logs():
     with open("lottery.log", "r") as f:
         content = f.read().splitlines()[-10:]
