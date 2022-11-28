@@ -54,7 +54,12 @@ def anonymous_user():
         @wraps(f)
         def wrapped(*args, **kwargs):
             if not current_user.is_anonymous:
-                return render_template('main/index.html')
+                return render_template('users/account.html',
+                                       acc_no=current_user.id,
+                                       email=current_user.email,
+                                       firstname=current_user.firstname,
+                                       lastname=current_user.lastname,
+                                       phone=current_user.phone)
             return f(*args, **kwargs)
 
         return wrapped
