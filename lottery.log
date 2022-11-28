@@ -14,3 +14,4 @@
 11/22/2022 04:50:20 PM : SECURITY - Invalid access attempt [1, admin@email.com, admin, 127.0.0.1]
 11/22/2022 04:51:55 PM : SECURITY - Invalid access attempt [1, admin@email.com, admin, 127.0.0.1]
 11/22/2022 04:52:08 PM : SECURITY - Log out [1, admin@email.com, 127.0.0.1]
+11/28/2022 01:32:35 PM : SECURITY - Log in [1, admin@email.com, 127.0.0.1]

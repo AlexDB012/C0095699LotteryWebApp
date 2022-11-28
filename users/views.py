@@ -5,7 +5,7 @@ from flask import Blueprint, render_template, flash, redirect, url_for, session,
 from flask_login import login_user, current_user, logout_user, login_required
 from markupsafe import Markup
 from datetime import datetime
-from static.helpers import log_invalid_access_attempt, required_roles
+from static.helpers import required_roles, anonymous_user
 from app import db
 from models import User
 from users.forms import RegisterForm, LoginForm
@@ -19,6 +19,7 @@ admin_blueprint = Blueprint('admin', __name__, template_folder='templates')
 # VIEWS
 # view registration
 @users_blueprint.route('/register', methods=['GET', 'POST'])
+@anonymous_user()
 def register():
     # create signup form object
     form = RegisterForm()
@@ -59,6 +60,7 @@ def register():
 
 # view user login
 @users_blueprint.route('/login', methods=['GET', 'POST'])
+@anonymous_user()
 def login():
     if not session.get('authentication_attempts'):
         session['authentication_attempts'] = 0

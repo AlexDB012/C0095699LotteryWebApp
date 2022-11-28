@@ -48,3 +48,16 @@ def required_roles(*roles):
         return wrapped
 
     return wrapper
+
+def anonymous_user():
+    def wrapper(f):
+        @wraps(f)
+        def wrapped(*args, **kwargs):
+            if not current_user.is_anonymous:
+                return render_template('main/index.html')
+            return f(*args, **kwargs)
+
+        return wrapped
+
+    return wrapper
+
