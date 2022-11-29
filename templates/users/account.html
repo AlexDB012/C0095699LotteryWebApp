@@ -4,6 +4,13 @@
 
 <div class="column is-6 is-offset-3">
     <h3 class="title">Your Account</h3>
+    {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="notification is-danger">
+                    {{ messages[0] }}
+                </div>
+            {% endif %}
+        {% endwith %}
     <div class="box">
         <table class="table">
         <tbody>

@@ -17,3 +17,4 @@
 11/28/2022 01:32:35 PM : SECURITY - Log in [1, admin@email.com, 127.0.0.1]
 11/28/2022 01:51:45 PM : SECURITY - Log out [1, admin@email.com, 127.0.0.1]
 11/28/2022 01:52:54 PM : SECURITY - Log in [1, admin@email.com, 127.0.0.1]
+11/29/2022 09:25:51 AM : SECURITY - Log in [2, alex.bove.123@hotmail.com, 127.0.0.1]

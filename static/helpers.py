@@ -2,7 +2,7 @@ import logging
 
 from cryptography.fernet import Fernet
 from flask_login import current_user
-from flask import request, render_template
+from flask import request, render_template, flash
 from functools import wraps
 
 
@@ -54,6 +54,7 @@ def anonymous_user():
         @wraps(f)
         def wrapped(*args, **kwargs):
             if not current_user.is_anonymous:
+                flash('You cannot access this page now you are logged in!')
                 return render_template('users/account.html',
                                        acc_no=current_user.id,
                                        email=current_user.email,
