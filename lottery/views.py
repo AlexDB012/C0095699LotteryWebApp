@@ -27,38 +27,26 @@ def lottery():
 @login_required
 @required_roles('user')
 def add_draw():
-    # variable used to determine if draw is valid or not
-    draw_missing_numbers = False
-
-    # get new winning draw entered in form
+    # get new draw entered in form
     submitted_draw = ''
     for i in range(6):
-        # checks if any values being submitted are missing and if so breaks and doesn't let it be submitted
-        if request.form.get('no' + str(i + 1)) == '':
-            draw_missing_numbers = True
-            break
-        # if no issue the current number is added to the submitted draw
+        # Get number from input field and add to draw
         submitted_draw += request.form.get('no' + str(i + 1)) + ' '
     # remove any surrounding whitespace
     submitted_draw.strip()
 
-    # if the winning draw attempting to be submitted is missing numbers doesn't let it submit it
-    if not draw_missing_numbers:
-        # create a new draw with the form data.
-        new_draw = Draw(user_id=current_user.id,
-                        numbers=encrypt(submitted_draw, current_user.encryptkey), master_draw=False,
-                        lottery_round=0)
+    # create a new draw with the form data.
+    new_draw = Draw(user_id=current_user.id,
+                    numbers=encrypt(submitted_draw, current_user.encryptkey), master_draw=False,
+                    lottery_round=0)
 
-        # add the new draw to the database
-        db.session.add(new_draw)
-        db.session.commit()
+    # add the new draw to the database
+    db.session.add(new_draw)
+    db.session.commit()
 
-        # re-render lottery.page
-        flash('Draw %s submitted.' % submitted_draw)
-        return lottery()
-    else:
-        flash('Draw must contain 6 numbers')
-        return lottery()
+    # re-render lottery.page
+    flash('Draw %s submitted.' % submitted_draw)
+    return lottery()
 
 
 # view all draws that have not been played

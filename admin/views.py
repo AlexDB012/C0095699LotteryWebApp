@@ -34,51 +34,39 @@ def view_all_users():
 @login_required
 @required_roles('admin')
 def create_winning_draw():
-    # variable used to determine if draw is valid or not
-    draw_missing_numbers = False
 
     # get new winning draw entered in form
     submitted_draw = ''
     for i in range(6):
-        # checks if any values being submitted are missing and if so breaks and doesn't let it be submitted
-        if request.form.get('no' + str(i + 1)) == '':
-            draw_missing_numbers = True
-            break
-        # if no issue the current number is added to the submitted draw
+        # Get number from input field and add to draw
         submitted_draw += request.form.get('no' + str(i + 1)) + ' '
     # remove any surrounding whitespace
     submitted_draw.strip()
 
-    # if the winning draw attempting to be submitted is missing numbers doesn't let it submit it
-    if not draw_missing_numbers:
-        # get current winning draw
-        current_winning_draw = Draw.query.filter_by(master_draw=True).first()
-        lottery_round = 1
+    # get current winning draw
+    current_winning_draw = Draw.query.filter_by(master_draw=True).first()
+    lottery_round = 1
 
-        # if a current winning draw exists
-        if current_winning_draw:
-            # update lottery round by 1
-            lottery_round = current_winning_draw.lottery_round + 1
+    # if a current winning draw exists
+    if current_winning_draw:
+        # update lottery round by 1
+        lottery_round = current_winning_draw.lottery_round + 1
 
-            # delete current winning draw
-            db.session.delete(current_winning_draw)
-            db.session.commit()
-
-        # create a new draw object with the form data.
-        new_winning_draw = Draw(user_id=0, numbers=encrypt(submitted_draw, current_user.encryptkey), master_draw=True,
-                                lottery_round=lottery_round)
-
-        # add the new winning draw to the database
-        db.session.add(new_winning_draw)
+        # delete current winning draw
+        db.session.delete(current_winning_draw)
         db.session.commit()
 
-        # re-render admin page
-        flash("New winning draw added.")
-        return admin()
+    # create a new draw object with the form data.
+    new_winning_draw = Draw(user_id=0, numbers=encrypt(submitted_draw, current_user.encryptkey), master_draw=True,
+                            lottery_round=lottery_round)
 
-    else:
-        flash('Draw must contain 6 numbers')
-        return admin()
+    # add the new winning draw to the database
+    db.session.add(new_winning_draw)
+    db.session.commit()
+
+    # re-render admin page
+    flash("New winning draw added.")
+    return admin()
 
 
 # view current winning draw
