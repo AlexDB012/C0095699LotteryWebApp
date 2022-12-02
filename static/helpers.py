@@ -49,6 +49,7 @@ def required_roles(*roles):
 
     return wrapper
 
+# Wrapper for making user logged in users can't access anonymous only pages
 def anonymous_user():
     def wrapper(f):
         @wraps(f)
@@ -66,4 +67,3 @@ def anonymous_user():
         return wrapped
 
     return wrapper
-
