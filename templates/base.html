@@ -45,26 +45,20 @@
                             <a href="{{ url_for('lottery.lottery') }}" class="navbar-item">
                                 Lottery
                             </a>
-                            <a href="{{ url_for('users.account') }}" class="navbar-item">
-                                Account
-                            </a>
-                            <a href="{{ url_for('users.logout') }}" class="navbar-item">
-                                Logout
-                            </a>
                         {% endif %}
                         {% if current_user.role == 'admin' %}
                             <a href="{{ url_for('admin.admin') }}" class="navbar-item">
                                 Admin
                             </a>
-                            <a href="{{ url_for('users.account') }}" class="navbar-item">
+                        {% endif %}
+                    {% if current_user.is_anonymous != true %}
+                    <a href="{{ url_for('users.account') }}" class="navbar-item">
                                 Account
                             </a>
                             <a href="{{ url_for('users.logout') }}" class="navbar-item">
                                 Logout
                             </a>
-                        {% endif %}
-
-
+                    {% endif %}
 
                     </div>
                 </div>
